@@ -1,9 +1,6 @@
 package com.google.ar.core.examples.java.helloar;
 
-/**
- * Written by Bartosz Szczygiel <eziosoft@gmail.com>
- * Created on 03/10/2018.
- */
+
 /**
  * Small, easy to use PID implementation with advanced controller capability.<br>
  * Minimal usage:<br>
