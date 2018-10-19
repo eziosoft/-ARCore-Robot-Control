@@ -86,11 +86,7 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
             cameraLastPosition.set(cameraPosition.getPoint());
         }
 
-        synchronized (cameraTracePoints) {
-            cameraTracePoints.add(position.getPoint());
-            if (cameraTracePoints.size() > 100)
-                cameraTracePoints.remove(0);
-        }
+
     }
 
 
@@ -127,18 +123,55 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
     private FloatBuffer fb;
     private Plane plane;
 
-    protected void onDraw(Canvas c) {
 
+    int degreesCounter = 0;
+
+    protected void onDraw(Canvas c) {
+        drawBackground(c);
+        drawPlanes(c);
+        boolean collision = drawPoints(c, robot.getPoint(), 0.5f, 0.2f);
+        drawCamera(c, collision);
+        drawTrace(c);
+
+        //move target in figure 8
+        degreesCounter++;
+        if (degreesCounter > 360) degreesCounter = 1;
+        target.x = (float) Math.sin(Math.toRadians(degreesCounter)) + cameraPosition.x;
+        target.z = (float) (Math.sin(Math.toRadians(2 * degreesCounter))) + cameraPosition.z;
+        target.draw(c, getX(target.x), 0, getZ(target.z), viewScale);
+
+
+        robot.setTarget(target);
+        robot.y = cameraPosition.y;
+        robot.move();
+        robot.draw(c, getX(robot.x), robot.y, getZ(robot.z));
+        addTracePoint(robot.getPoint());
+    }
+
+
+    private void drawBackground(Canvas c) {
         //draw cross in the middle
         c.drawLine(getX(-1f), getZ(0), getX(1f), getZ(0), paint1);
         c.drawLine(getX(0f), getZ(-1f), getX(0), getZ(1f), paint1);
 
+        float gridSize = 0.2f; // in m
+        float gridArea = 5;
 
+        // gridArea = (float) Math.sqrt(gridArea );
+        paint1.setStyle(Paint.Style.STROKE);
+        for (float i = -gridArea; i < gridArea; i += gridSize) {
+            for (float j = -gridArea; j < gridArea; j += gridSize) {
+                if (isInside(getX(i), getZ(j)))
+                    c.drawRect(getX(i), getZ(j), getX(i + gridSize), getZ(j + gridSize), paint1);
+            }
+        }
+
+    }
+
+    private void drawPlanes(Canvas c) {
         synchronized (planes) {
             for (int i = 0; i < planes.size(); i++) {
                 plane = planes.valueAt(i);
-
-
                 fb = plane.getPolygon();
                 pathTmp.reset();
                 while (fb.hasRemaining()) {
@@ -147,61 +180,72 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
 
                     buf = plane.getCenterPose().transformPoint(buf);
                     if (pathTmp.isEmpty())
-                        pathTmp.moveTo(viewOffsetX + buf[0] * viewScale + mWidth / 2, viewOffsetZ + buf[2] * viewScale + mHeight / 2);
+                        pathTmp.moveTo(getX(buf[0]), getZ(buf[2]));
                     else
-                        pathTmp.lineTo(viewOffsetX + buf[0] * viewScale + mWidth / 2, viewOffsetZ + buf[2] * viewScale + mHeight / 2);
+                        pathTmp.lineTo(getX(buf[0]), getZ(buf[2]));
                 }
                 c.drawPath(pathTmp, paint1);
             }
         }
+    }
 
 
+    private boolean drawPoints(Canvas c, Point robot, float collisionDistance, float Ydistance) {
         paint.setStrokeWidth(2);
         boolean collision = false;
         synchronized (points) {
             for (int i = 0; i < points.size(); i++) {
-                if (Math.abs(points.valueAt(i).y - cameraPosition.y) < 0.2) {
-                    paint.setColor(Color.GREEN);
-                    if (points.valueAt(i).getDistanceTo(cameraPosition.getPoint()) < 1)
+                if (Math.abs(points.valueAt(i).y - robot.y) < Ydistance) {
+                    paint.setStrokeWidth(1 * viewScale * 0.2f);
+                    paint.setColor(Color.MAGENTA);
+                    if (points.valueAt(i).getDistanceTo(robot.getPoint()) < collisionDistance) {
                         collision = true;
-                } else
+                        c.drawLine(getX(points.valueAt(i).x), getZ(points.valueAt(i).z), getX(robot.x), getZ(robot.z), paint1);
+                    }
+                } else {
+                    paint.setStrokeWidth(2);
                     paint.setColor(Color.GRAY);
-                c.drawPoint(viewOffsetX + (points.valueAt(i).x) * viewScale + mWidth / 2, viewOffsetZ + (points.valueAt(i).z) * viewScale + mHeight / 2, paint);
+                }
+                if (isInside(getX(points.valueAt(i).x), getZ(points.valueAt(i).z)))
+                    c.drawPoint(getX(points.valueAt(i).x), getZ(points.valueAt(i).z), paint);
             }
         }
 
+        return collision;
+    }
+
+
+    private void drawCamera(Canvas c, boolean collision) {
+        //draw camera
         paint.setStrokeWidth(5);
         paint.setColor(collision ? Color.RED : Color.GREEN);
         synchronized (cameraPosition) {
-            float px = viewOffsetX + viewScale * cameraPosition.x + mWidth / 2;
-            float pz = viewOffsetZ + viewScale * cameraPosition.z + mHeight / 2;
-
-            if (px < 0 || px > mWidth || pz < 0 || pz > mHeight) viewScale--;
-            c.drawCircle(px, pz, 10, paint);
-            c.drawLine(px, pz, (float) (px - 1 * viewScale * Math.sin((cameraHeading))), (float) (pz - 1 * viewScale * Math.cos((cameraHeading))), paint); // line is 1m long
+            if (getX(cameraPosition.x) < 0 || getX(cameraPosition.x) > mWidth || getZ(cameraPosition.z) < 0 || getZ(cameraPosition.z) > mHeight)
+                viewScale--;
+            c.drawCircle(getX(cameraPosition.x), getZ(cameraPosition.z), 10, paint);
+            c.drawLine(getX(cameraPosition.x), getZ(cameraPosition.z), (float) (getX(cameraPosition.x) - 1 * viewScale * Math.sin((cameraHeading))), (float) (getZ(cameraPosition.z) - 1 * viewScale * Math.cos((cameraHeading))), paint); // line is 1m long
         }
+    }
 
-
+    private void drawTrace(Canvas c) {
+        //draw camera trace
         Object p[] = cameraTracePoints.toArray();
         pathTmp.reset();
         for (Object aP : p) {
-            float px = viewOffsetX + viewScale * ((Point) aP).x + mWidth / 2;
-            float pz = viewOffsetZ + viewScale * ((Point) aP).z + mHeight / 2;
-            if (pathTmp.isEmpty()) pathTmp.moveTo(px, pz);
+            if (pathTmp.isEmpty()) pathTmp.moveTo(getX(((Point) aP).x), getZ(((Point) aP).z));
             else
-                pathTmp.lineTo(px, pz);
+                pathTmp.lineTo(getX(((Point) aP).x), getZ(((Point) aP).z));
         }
         c.drawPath(pathTmp, paint2);
+    }
 
-        target.setPoint(cameraPosition);
-        robot.setTarget(target);
-        robot.move();
-        float px = (viewOffsetX + viewScale * robot.x + mWidth / 2);
-        float pz = (viewOffsetZ + viewScale * robot.z + mHeight / 2);
-        c.drawCircle(px, pz, 15, robot.paint);
-        c.drawLine(px, pz, (float) (px + 50 * Math.sin((robot.heading))), (float) (pz + 50 * Math.cos((robot.heading))), paint);
-        c.drawText(String.valueOf(robot.distanceToTarget()), px, pz, paint);
 
+    private void addTracePoint(Point point) {
+        synchronized (cameraTracePoints) {
+            cameraTracePoints.add(point);
+            if (cameraTracePoints.size() > 100)
+                cameraTracePoints.remove(0);
+        }
     }
 
 
@@ -248,6 +292,11 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
 
     float getZ(float z) {
         return viewOffsetZ + viewScale * z + mHeight / 2;
+    }
+
+
+    boolean isInside(float x, float z) {
+        return (x > 0 && x < mWidth && z > 0 && z < mHeight);
     }
 }
 

@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.helloar;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
@@ -75,5 +76,16 @@ class Robot {
         float deltaX = (x - target.x) * (x - target.x);
         float deltaY = (z - target.z) * (z - target.z);
         return (float) Math.sqrt(deltaX + deltaY);
+    }
+
+    public void draw(Canvas c, float x, float y, float z) {
+        c.drawCircle(x, z, 15, paint);
+        c.drawLine(x, z, (float) (x + 50 * Math.sin(heading)), (float) (z + 50 * Math.cos(heading)), paint);
+        c.drawText(String.valueOf(distanceToTarget()), x, z, paint);
+    }
+
+
+    public Point getPoint() {
+        return new Point(x, y, z);
     }
 }
