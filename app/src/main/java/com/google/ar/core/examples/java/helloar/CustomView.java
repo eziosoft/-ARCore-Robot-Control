@@ -44,6 +44,7 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
 
     Robot robot;
     private com.google.ar.core.examples.java.helloar.Target target;
+    private Map map = new Map(100, 0.2f);
 
     public void addPlanes(Collection<Plane> allPlanes) {
         synchronized (planes) {
@@ -99,7 +100,7 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
         paint.setColor(Color.RED);
         paint.setStrokeWidth(4);
         paint1.setColor(Color.GREEN);
-        paint1.setAlpha(50);
+        //paint1.setAlpha(50);
 
         paint2.setStrokeWidth(2);
         paint2.setColor(Color.YELLOW);
@@ -127,7 +128,8 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
     int degreesCounter = 0;
 
     protected void onDraw(Canvas c) {
-        drawBackground(c);
+        //drawBackground(c);
+        drawMap(c);
         drawPlanes(c);
         boolean collision = drawPoints(c, robot.getPoint(), 0.5f, 0.2f);
         drawCamera(c, collision);
@@ -149,6 +151,24 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
     }
 
 
+    private void drawMap(Canvas c) {
+        for (int i = 0; i < map.size; i++) {
+            for (int j = 0; j < map.size; j++) {
+                if (map.spots[i][j].obstacle) {
+                    paint1.setStyle(Paint.Style.FILL);
+                } else {
+                    paint1.setStyle(Paint.Style.STROKE);
+                }
+
+                c.drawRect(getX(map.spots[i][j].location.x) - map.spot_size_m * viewScale / 2f,
+                        getZ(map.spots[i][j].location.z) - map.spot_size_m * viewScale / 2f,
+                        getX(map.spots[i][j].location.x) + map.spot_size_m * viewScale / 2f,
+                        getZ(map.spots[i][j].location.z) + map.spot_size_m * viewScale / 2f,
+                        paint1);
+            }
+        }
+    }
+
     private void drawBackground(Canvas c) {
         //draw cross in the middle
         c.drawLine(getX(-1f), getZ(0), getX(1f), getZ(0), paint1);
@@ -169,6 +189,8 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
     }
 
     private void drawPlanes(Canvas c) {
+        paint1.setStyle(Paint.Style.STROKE);
+
         synchronized (planes) {
             for (int i = 0; i < planes.size(); i++) {
                 plane = planes.valueAt(i);
@@ -198,6 +220,9 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
                 if (Math.abs(points.valueAt(i).y - robot.y) < Ydistance) {
                     paint.setStrokeWidth(1 * viewScale * 0.2f);
                     paint.setColor(Color.MAGENTA);
+
+                    map.setObstacle(points.valueAt(i), true);
+
                     if (points.valueAt(i).getDistanceTo(robot.getPoint()) < collisionDistance) {
                         collision = true;
                         c.drawLine(getX(points.valueAt(i).x), getZ(points.valueAt(i).z), getX(robot.x), getZ(robot.z), paint1);
@@ -206,8 +231,10 @@ public class CustomView extends android.support.v7.widget.AppCompatImageView {
                     paint.setStrokeWidth(2);
                     paint.setColor(Color.GRAY);
                 }
-                if (isInside(getX(points.valueAt(i).x), getZ(points.valueAt(i).z)))
+                if (isInside(getX(points.valueAt(i).x), getZ(points.valueAt(i).z))) {
                     c.drawPoint(getX(points.valueAt(i).x), getZ(points.valueAt(i).z), paint);
+                }
+
             }
         }
 

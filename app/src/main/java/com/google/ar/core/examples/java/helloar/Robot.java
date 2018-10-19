@@ -15,6 +15,7 @@ class Robot {
     private MiniPID pidSpeed = new MiniPID(0.25, 0.00, 0.0);
 
     float x = 1, y, z = -1, heading, speed;
+
     Target target = new Target();
     Paint paint = new Paint();
 
