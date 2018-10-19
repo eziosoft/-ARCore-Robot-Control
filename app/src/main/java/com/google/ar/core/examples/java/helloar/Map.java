@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar;
 
+import android.graphics.Paint;
+
 /**
  * Written by Bartosz Szczygiel <eziosoft@gmail.com>
  * Created on 19/10/2018.
@@ -9,11 +11,16 @@ public class Map {
     public int size = 10;
     public float spot_size_m = 0.1f; //in m
 
+
     public Map(int size, float spot_size_m) {
         this.size = size;
         this.spot_size_m = spot_size_m;
         spots = new Spot[size][size];
+        clear();
+    }
 
+
+    public void clear() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 spots[i][j] = new Spot();
@@ -22,15 +29,20 @@ public class Map {
                 spots[i][j].location.z = (j - size / 2f) * spot_size_m;
             }
         }
-
     }
 
-
     public void setObstacle(Point point, boolean obstacle) {
-        int i = (int) (point.x / (spot_size_m) + size / 2f);
-        int j = (int) (point.z / (spot_size_m) + size / 2f);
+        if (getSpot(point) != null)
+            getSpot(point).obstacle = obstacle;
+    }
+
+    public Spot getSpot(Point point) {
+        int i = (int) (point.x / spot_size_m + size / 2);
+        int j = (int) (point.z / spot_size_m + size / 2);
 
         if (i > 0 && j > 0 && i < size && j < size)
-            spots[i][j].obstacle = obstacle;
+            return spots[i][j];
+        else
+            return null;
     }
 }

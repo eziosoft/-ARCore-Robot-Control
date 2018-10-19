@@ -27,7 +27,7 @@ public class Target {
         float deltaX = Math.abs(x - robot.x) * Math.abs(x - robot.x);
         float deltaZ = Math.abs(z - robot.z) * Math.abs(z - robot.z);
         float distance = (float) Math.sqrt(deltaX + deltaZ);
-        Log.d("aaa", "isInRange: " + range);
+//        Log.d("aaa", "isInRange: " + range);
         return distance < range;
     }
 

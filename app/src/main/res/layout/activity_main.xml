@@ -49,35 +49,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/customView"
+        app:layout_constraintBottom_toTopOf="@+id/NAVIGATION_VIEW"
         app:layout_constraintGuide_percent="0.3"
         app:layout_constraintTop_toBottomOf="@+id/surfaceview" />
 
-    <com.google.ar.core.examples.java.helloar.CustomView
-        android:id="@+id/customView"
+    <com.google.ar.core.examples.java.helloar.NavigationView
+        android:id="@+id/NAVIGATION_VIEW"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline"
         app:layout_constraintVertical_bias="0.0" />
 
-    <Button
-        android:id="@+id/zoomPlus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="+"
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/zoomMinus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="-"
-        app:layout_constraintBottom_toTopOf="@+id/zoomPlus"
-        app:layout_constraintStart_toStartOf="@+id/customView" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_menu" />
 
 </android.support.constraint.ConstraintLayout>

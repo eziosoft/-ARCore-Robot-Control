@@ -11,8 +11,8 @@ import android.graphics.Paint;
 class Robot {
     float FB; //forward backward
     float LR; //left right
-    private MiniPID pidLR = new MiniPID(0.25, 0.00, 0.0);
-    private MiniPID pidSpeed = new MiniPID(0.25, 0.00, 0.0);
+    private MiniPID pidLR = new MiniPID(0.25, 0.008, 0.001);
+    private MiniPID pidSpeed = new MiniPID(0.25, 0.003, 0.001);
 
     float x = 1, y, z = -1, heading, speed;
 
@@ -38,7 +38,7 @@ class Robot {
 
         LR = (float) pidLR.getOutput(heading);
 
-        heading += LR * 0.1;
+        heading += LR * 0.5;
 
         if (target.isInRange(this)) {
             paint.setColor(Color.YELLOW);
@@ -51,12 +51,12 @@ class Robot {
 
         FB = (float) pidSpeed.getOutput(distanceToTarget());
 
-        speed = (float) (-0.1f * FB);
+        speed = (-0.1f * FB);
         x = (float) (x + speed * Math.sin(heading));
         z = (float) (z + speed * Math.cos(heading));
 
 
-        //if (heading > 2 * Math.PI) heading = 0;
+        if (heading > Math.toRadians(360) || heading < 0) heading = 0;
     }
 
 

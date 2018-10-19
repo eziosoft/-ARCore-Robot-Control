@@ -19,10 +19,9 @@ package com.google.ar.core.examples.java.helloar;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,6 +84,8 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     private final float[] anchorMatrix = new float[16];
     private static final float[] DEFAULT_COLOR = new float[]{0f, 0f, 0f, 0f};
 
+    private BottomNavigationView bottomNavigationView;
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -100,7 +101,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
 
     private TextView TV1;
-    private CustomView customView;
+    private NavigationView navigationView;
     private String s = "";
 
 
@@ -125,10 +126,24 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         installRequested = false;
 
         TV1 = findViewById(R.id.TV1);
-        customView = findViewById(R.id.customView);
+        navigationView = findViewById(R.id.NAVIGATION_VIEW);
 
-        findViewById(R.id.zoomMinus).setOnClickListener(v -> customView.setViewScale(customView.getViewScale() - 10));
-        findViewById(R.id.zoomPlus).setOnClickListener(v -> customView.setViewScale(customView.getViewScale() + 10));
+
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.menu_plus:
+                    navigationView.setViewScale(navigationView.getViewScale() + 10);
+                    break;
+                case R.id.menu_minus:
+                    navigationView.setViewScale(navigationView.getViewScale() - 10);
+                    break;
+                case R.id.menu_clear:
+                    navigationView.clear();
+                    break;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -299,12 +314,12 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
                 float[] rotation = quaternionToEulerAngle(pose.getRotationQuaternion());
 
-                s = String.format("x=%f y=%f z=%f s=%f\n%f %f %f points=%d planes=%d", x, y, z, customView.speed_ms, Math.toDegrees(rotation[0]), Math.toDegrees(rotation[1]), Math.toDegrees(rotation[2]), customView.getPointsCount(), customView.getPlanesCount());
-                s += String.format("\nRL=%f FB=%f", customView.robot.LR, customView.robot.FB);
+                s = String.format("x=%f y=%f z=%f s=%f\n%f %f %f points=%d planes=%d", x, y, z, navigationView.speed_ms, Math.toDegrees(rotation[0]), Math.toDegrees(rotation[1]), Math.toDegrees(rotation[2]), navigationView.getPointsCount(), navigationView.getPlanesCount());
+                s += String.format("\nRL=%f FB=%f", navigationView.robot.LR, navigationView.robot.FB);
                 TV1.setText(s);
 
 
-                customView.setPosition(new Point(x, y, z), rotation[1]);
+                navigationView.setPosition(new Point(x, y, z), rotation[1]);
 
             }
 
@@ -351,7 +366,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
                 if (confidence > 0.6)
 //                    if (Math.abs(camera.getDisplayOrientedPose().ty() - y) < 1)
-                    customView.addPoint(new Point(x, y, z));
+                    navigationView.addPoint(new Point(x, y, z));
             }
 
 
@@ -371,7 +386,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             planeRenderer.drawPlanes(
                     session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
 
-            customView.addPlanes(session.getAllTrackables(Plane.class));
+            navigationView.addPlanes(session.getAllTrackables(Plane.class));
 
             // Visualize anchors created by touch.
             float scaleFactor = 1.0f;
@@ -395,7 +410,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             Log.e(TAG, "Exception on the OpenGL thread", t);
         }
 
-        customView.invalidate();
+        navigationView.invalidate();
     }
 
     // Handle only one tap per frame, as taps are usually low frequency compared to frame rate.
