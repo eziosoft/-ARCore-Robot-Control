@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.helloar.helpers;
 
 //https://stackoverflow.com/questions/3793400/is-there-a-function-in-java-to-get-moving-average
 public class MovingAverage {

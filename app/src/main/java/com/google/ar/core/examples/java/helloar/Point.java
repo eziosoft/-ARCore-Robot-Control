@@ -1,16 +1,17 @@
 package com.google.ar.core.examples.java.helloar;
 
+import com.google.ar.core.examples.java.helloar.fromProcessing.PVector;
+
 /**
  * Written by Bartosz Szczygiel <eziosoft@gmail.com>
  * Created on 02/10/2018.
  */
-public class Point {
+public class Point extends PVector {
     public float x;
     public float y;
     public float z;
 
     public Point(float x, float y, float z) {
-
         this.x = x;
         this.y = y;
         this.z = z;

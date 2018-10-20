@@ -11,6 +11,7 @@ import android.util.SparseArray;
 
 import com.google.ar.core.Plane;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.examples.java.helloar.helpers.MovingAverage;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;

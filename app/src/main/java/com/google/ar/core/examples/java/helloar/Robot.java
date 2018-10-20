@@ -4,6 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.google.ar.core.examples.java.helloar.helpers.MiniPID;
+
 /**
  * Written by Bartosz Szczygiel <eziosoft@gmail.com>
  * Created on 28/09/2018.
@@ -57,6 +59,9 @@ class Robot {
 
 
         if (heading > Math.toRadians(360) || heading < 0) heading = 0;
+
+        Point p = new Point(0, 0, 0);
+        p.sub(p);
     }
 
 
