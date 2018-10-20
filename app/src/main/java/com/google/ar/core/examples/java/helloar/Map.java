@@ -29,6 +29,12 @@ public class Map {
                 spots[i][j].location.z = (j - size / 2f) * spot_size_m;
             }
         }
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+
+            }
+        }
     }
 
     public void setObstacle(Point point, boolean obstacle) {

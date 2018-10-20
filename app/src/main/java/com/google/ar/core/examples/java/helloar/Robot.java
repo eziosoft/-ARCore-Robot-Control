@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.google.ar.core.examples.java.helloar.fromProcessing.PVector;
 import com.google.ar.core.examples.java.helloar.helpers.MiniPID;
 
 /**
@@ -24,10 +25,30 @@ class Robot {
 
     Robot() {
         paint.setColor(Color.BLUE);
+    }
+
+
+    void move() {
+        stear();
+        speed();
+
+        if (target.isInRange(this)) speed = 0;
+        //move for simulation
+        x = (float) (x + speed * Math.sin(heading));
+        z = (float) (z + speed * Math.cos(heading));
+
+
+        //change color if target is in range
+        if (target.isInRange(this)) {
+            paint.setColor(Color.YELLOW);
+        } else {
+            paint.setColor(Color.BLUE);
+        }
 
     }
 
-    void move() {
+
+    private void stear() {
         float headingToTarget = headingToTarget();
         if ((headingToTarget - heading) < Math.toRadians(-180))
             headingToTarget += Math.toRadians(360);
@@ -37,31 +58,20 @@ class Robot {
 
         pidLR.setSetpoint(headingToTarget);
         pidLR.setOutputLimits(1);
-
         LR = (float) pidLR.getOutput(heading);
 
+        //for simulation
         heading += LR * 0.5;
+//        if (heading > Math.toRadians(360) || heading < 0) heading = 0;
+    }
 
-        if (target.isInRange(this)) {
-            paint.setColor(Color.YELLOW);
-        } else {
-            paint.setColor(Color.BLUE);
-        }
-
+    private void speed() {
         pidSpeed.setSetpoint(0);
         pidSpeed.setOutputLimits(1);
+        FB = (float) pidSpeed.getOutput(getPoint().getDistance2D(target.getPoint()));
 
-        FB = (float) pidSpeed.getOutput(distanceToTarget());
-
+        //for simulation
         speed = (-0.1f * FB);
-        x = (float) (x + speed * Math.sin(heading));
-        z = (float) (z + speed * Math.cos(heading));
-
-
-        if (heading > Math.toRadians(360) || heading < 0) heading = 0;
-
-        Point p = new Point(0, 0, 0);
-        p.sub(p);
     }
 
 
@@ -78,16 +88,16 @@ class Robot {
         return i;
     }
 
-    float distanceToTarget() {
-        float deltaX = (x - target.x) * (x - target.x);
-        float deltaY = (z - target.z) * (z - target.z);
-        return (float) Math.sqrt(deltaX + deltaY);
-    }
+//    float distanceToTarget() {
+//        float deltaX = (x - target.x) * (x - target.x);
+//        float deltaY = (z - target.z) * (z - target.z);
+//        return (float) Math.sqrt(deltaX + deltaY);
+//    }
 
     public void draw(Canvas c, float x, float y, float z) {
         c.drawCircle(x, z, 15, paint);
         c.drawLine(x, z, (float) (x + 50 * Math.sin(heading)), (float) (z + 50 * Math.cos(heading)), paint);
-        c.drawText(String.valueOf(distanceToTarget()), x, z, paint);
+//        c.drawText(String.valueOf(distanceToTarget()), x, z, paint);
     }
 
 

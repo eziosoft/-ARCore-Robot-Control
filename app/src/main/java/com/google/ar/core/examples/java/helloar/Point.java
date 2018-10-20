@@ -1,12 +1,10 @@
 package com.google.ar.core.examples.java.helloar;
 
-import com.google.ar.core.examples.java.helloar.fromProcessing.PVector;
-
 /**
  * Written by Bartosz Szczygiel <eziosoft@gmail.com>
  * Created on 02/10/2018.
  */
-public class Point extends PVector {
+public class Point  {
     public float x;
     public float y;
     public float z;
@@ -29,7 +27,7 @@ public class Point extends PVector {
     }
 
 
-    float getDistanceTo(Point p) {
+    float getDistance2D(Point p) {
         float deltaX = (x - p.x) * (x - p.x);
         float deltaY = (z - p.z) * (z - p.z);
         return (float) Math.sqrt(deltaX + deltaY);

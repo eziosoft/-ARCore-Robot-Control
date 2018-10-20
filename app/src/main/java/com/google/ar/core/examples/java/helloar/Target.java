@@ -3,8 +3,6 @@ package com.google.ar.core.examples.java.helloar;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.util.Log;
 
 
 /**

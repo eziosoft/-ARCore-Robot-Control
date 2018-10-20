@@ -218,7 +218,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         surfaceView.onResume();
         displayRotationHelper.onResume();
 
-        messageSnackbarHelper.showMessage(this, "Searching for surfaces...");
+//        messageSnackbarHelper.showMessage(this, "Searching for surfaces...");
     }
 
     @Override
@@ -315,7 +315,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 float[] rotation = quaternionToEulerAngle(pose.getRotationQuaternion());
 
                 s = String.format("x=%f y=%f z=%f s=%f\n%f %f %f points=%d planes=%d", x, y, z, navigationView.speed_ms, Math.toDegrees(rotation[0]), Math.toDegrees(rotation[1]), Math.toDegrees(rotation[2]), navigationView.getPointsCount(), navigationView.getPlanesCount());
-                s += String.format("\nRL=%f FB=%f", navigationView.robot.LR, navigationView.robot.FB);
+//                s += String.format("\nRL=%f FB=%f", navigationView.robot.LR, navigationView.robot.FB);
                 TV1.setText(s);
 
 

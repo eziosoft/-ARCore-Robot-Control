@@ -48,7 +48,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
     Robot robot;
     private com.google.ar.core.examples.java.helloar.Target target;
-    private final Map map = new Map(50, 0.2f);
+    private final Map map = new Map(10, 1f);
 
 
     public void clear() {
@@ -99,7 +99,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
             viewOffsetZ = (int) (mHeight / 2 - pz);
 
 
-            speed_ms = speedAvg.next(cameraLastPosition.getDistanceTo(cameraPosition.getPoint()) / (System.currentTimeMillis() - lastMillis) * 1000);
+            speed_ms = speedAvg.next(cameraLastPosition.getDistance2D(cameraPosition.getPoint()) / (System.currentTimeMillis() - lastMillis) * 1000);
             lastMillis = System.currentTimeMillis();
             cameraLastPosition.set(cameraPosition.getPoint());
         }
@@ -159,17 +159,17 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
         if (degreesCounter > 360) degreesCounter = 1;
         target.x = (float) Math.sin(Math.toRadians(degreesCounter)) + cameraPosition.x;
         target.z = (float) (Math.sin(Math.toRadians(2 * degreesCounter))) + cameraPosition.z;
-        target.draw(c, getX(target.x), 0, getZ(target.z), viewScale);
 
 
         robot.setTarget(target);
         robot.y = cameraPosition.y;
         robot.move();
-        robot.draw(c, getX(robot.x), robot.y, getZ(robot.z));
         addTracePoint(robot.getPoint());
 
-        drawOnMap(c, map.getSpot(target.getPoint()), Color.RED);
-        drawOnMap(c, map.getSpot(robot.getPoint()), Color.BLUE);
+        drawOnMap(c, map.getSpot(target.getPoint()), Color.RED, true);
+        drawOnMap(c, map.getSpot(robot.getPoint()), Color.BLUE, true);
+        robot.draw(c, getX(robot.x), robot.y, getZ(robot.z));
+        target.draw(c, getX(target.x), 0, getZ(target.z), viewScale);
 
     }
 
@@ -180,24 +180,20 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
             for (int j = 0; j < map.size; j++) {
 
                 if (isInside(getX(map.spots[i][j].location.x), getZ(map.spots[i][j].location.z))) {
+                    drawOnMap(c, map.spots[i][j], Color.LTGRAY, map.spots[i][j].obstacle);
 
-                    if (map.spots[i][j].obstacle) {
-                        mapPaint.setStyle(Paint.Style.FILL);
-
-                        drawOnMap(c, map.spots[i][j], Color.LTGRAY);
-                    }// else {
-//                        mapPaint.setStyle(Paint.Style.STROKE);
-//                    }
-
+                    mapPaint.setTextSize(20);
+                    c.drawText(String.format("%d,%d", i, j), getX(map.spots[i][j].location.x), getZ(map.spots[i][j].location.z), mapPaint);
                 }
             }
         }
     }
 
 
-    private void drawOnMap(Canvas c, Spot spot, @ColorInt int color) {
+    private void drawOnMap(Canvas c, Spot spot, @ColorInt int color, boolean fill) {
         if (spot != null) {
             mapPaint.setColor(color);
+            mapPaint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
             c.drawRect(getX(spot.location.x) - map.spot_size_m * viewScale / 2f,
                     getZ(spot.location.z) - map.spot_size_m * viewScale / 2f,
                     getX(spot.location.x) + map.spot_size_m * viewScale / 2f,
@@ -242,7 +238,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
                     map.setObstacle(points.valueAt(i), true);
 
-                    if (points.valueAt(i).getDistanceTo(robot.getPoint()) < collisionDistance) {
+                    if (points.valueAt(i).getDistance2D(robot.getPoint()) < collisionDistance) {
                         collision = true;
                         c.drawLine(getX(points.valueAt(i).x), getZ(points.valueAt(i).z), getX(robot.x), getZ(robot.z), paint1);
                     }
