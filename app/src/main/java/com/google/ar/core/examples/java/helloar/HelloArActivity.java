@@ -138,8 +138,11 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 case R.id.menu_minus:
                     navigationView.setViewScale(navigationView.getViewScale() - 10);
                     break;
-                case R.id.menu_clear:
-                    navigationView.clear();
+//                case R.id.menu_clear:
+//                    navigationView.clear();
+//                    break;
+                case R.id.menu_reset_Astar:
+                    navigationView.resetAstar();
                     break;
             }
             return false;

@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.ar.core.Plane;
@@ -48,12 +49,15 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
     Robot robot;
     private com.google.ar.core.examples.java.helloar.Target target;
-    private final Map map = new Map(10, 1f);
+    private final Map map = new Map(50, 0.2f, true);
+
+    private AStar aStar = new AStar();
+    private int aStarState;
 
 
     public void clear() {
         synchronized (map) {
-            map.clear();
+            map.clear(true);
         }
         synchronized (planes) {
             planes.clear();
@@ -127,6 +131,16 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
         robot = new Robot();
         target = new com.google.ar.core.examples.java.helloar.Target();
+
+
+    }
+
+    public void resetAstar() {
+        aStar.reset();
+        aStar.setStartSpot(map.spots[0][0]);
+//        aStar.setEnd(map.spots[map.size - 1][map.size - 1]);
+        aStar.setEnd(map.getSpot(cameraPosition.getPoint()));
+        aStarState = 0;
     }
 
     @Override
@@ -168,8 +182,52 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
         drawOnMap(c, map.getSpot(target.getPoint()), Color.RED, true);
         drawOnMap(c, map.getSpot(robot.getPoint()), Color.BLUE, true);
+
+        //neightbours test
+//        for (Spot s : map.getSpot(robot.getPoint()).neighbours) {
+//            drawOnMap(c, s, Color.YELLOW, false);
+//        }
+
         robot.draw(c, getX(robot.x), robot.y, getZ(robot.z));
         target.draw(c, getX(target.x), 0, getZ(target.z), viewScale);
+
+
+        while (aStarState == 0)
+            aStarState = aStar.step();
+
+
+        switch (aStarState) {
+            case -1:
+                Log.d("aaa", "onDraw: No Solution");
+
+                break;
+            case 1:
+                Log.d("aaa", "onDraw: Goal Reached!");
+                for (Spot s : aStar.calcPath(aStar.getEnd())) {
+                    drawOnMap(c, s, Color.YELLOW, true);
+                }
+                break;
+            case 0:
+                Log.d("aaa", "onDraw: Still Searching");
+                if (aStar.getOpenSet() != null && aStar.getOpenSet().size() > 0)
+                    for (Spot s : aStar.calcPath(aStar.getOpenSet().get(aStar.getOpenSet().size() - 1))) {
+                        drawOnMap(c, s, Color.YELLOW, true);
+                    }
+                break;
+        }
+
+        for (
+                Spot s : aStar.getClosedSet())
+
+        {
+            drawOnMap(c, s, Color.RED, false);
+        }
+        for (
+                Spot s : aStar.getOpenSet())
+
+        {
+            drawOnMap(c, s, Color.GREEN, false);
+        }
 
     }
 
@@ -183,7 +241,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
                     drawOnMap(c, map.spots[i][j], Color.LTGRAY, map.spots[i][j].obstacle);
 
                     mapPaint.setTextSize(20);
-                    c.drawText(String.format("%d,%d", i, j), getX(map.spots[i][j].location.x), getZ(map.spots[i][j].location.z), mapPaint);
+                    // c.drawText(String.format("%d,%d", i, j), getX(map.spots[i][j].location.x), getZ(map.spots[i][j].location.z), mapPaint);
                 }
             }
         }
