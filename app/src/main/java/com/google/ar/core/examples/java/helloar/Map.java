@@ -1,7 +1,5 @@
 package com.google.ar.core.examples.java.helloar;
 
-import android.graphics.Paint;
-
 import java.util.Random;
 
 /**
@@ -34,7 +32,9 @@ public class Map {
                 spots[i][j].location.z = (j - size / 2f) * spot_size_m;
                 spots[i][j].i = i;
                 spots[i][j].j = j;
-                if (randomObstacles) spots[i][j].obstacle = random.nextFloat() < 0.2f;
+                if (randomObstacles) {
+                    spots[i][j].obstacle = random.nextFloat() < 0.2f;
+                }
             }
         }
 

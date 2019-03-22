@@ -5,7 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.support.annotation.ColorInt;
+
+import androidx.annotation.ColorInt;
+
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -24,7 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Written by Bartosz Szczygiel <eziosoft@gmail.com>
  * Created on 25/09/2018.
  */
-public class NavigationView extends android.support.v7.widget.AppCompatImageView {
+public class NavigationView extends androidx.appcompat.widget.AppCompatImageView {
 
     private int mWidth;
     private int mHeight;
@@ -34,7 +36,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
     private final Point cameraLastPosition = new Point(0f, 0f, 0f);
     private long lastMillis = 0;
     float speed_ms = 0;
-    MovingAverage speedAvg = new MovingAverage(5);
+    private MovingAverage speedAvg = new MovingAverage(5);
     private float cameraHeading;
 
     private final Paint paint = new Paint();
@@ -49,7 +51,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
     Robot robot;
     private com.google.ar.core.examples.java.helloar.Target target;
-    private final Map map = new Map(50, 0.2f, true);
+    private final Map map = new Map(200, 0.1f, false);
 
     private AStar aStar = new AStar();
     private int aStarState;
@@ -57,7 +59,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
 
     public void clear() {
         synchronized (map) {
-            map.clear(true);
+            map.clear(false);
         }
         synchronized (planes) {
             planes.clear();
@@ -217,15 +219,11 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
         }
 
         for (
-                Spot s : aStar.getClosedSet())
-
-        {
+                Spot s : aStar.getClosedSet()) {
             drawOnMap(c, s, Color.RED, false);
         }
         for (
-                Spot s : aStar.getOpenSet())
-
-        {
+                Spot s : aStar.getOpenSet()) {
             drawOnMap(c, s, Color.GREEN, false);
         }
 
@@ -238,7 +236,7 @@ public class NavigationView extends android.support.v7.widget.AppCompatImageView
             for (int j = 0; j < map.size; j++) {
 
                 if (isInside(getX(map.spots[i][j].location.x), getZ(map.spots[i][j].location.z))) {
-                    drawOnMap(c, map.spots[i][j], Color.LTGRAY, map.spots[i][j].obstacle);
+                    drawOnMap(c, map.spots[i][j], Color.DKGRAY, map.spots[i][j].obstacle);
 
                     mapPaint.setTextSize(20);
                     // c.drawText(String.format("%d,%d", i, j), getX(map.spots[i][j].location.x), getZ(map.spots[i][j].location.z), mapPaint);

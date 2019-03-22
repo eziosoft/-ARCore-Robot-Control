@@ -19,8 +19,11 @@ package com.google.ar.core.examples.java.helloar;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,10 +51,12 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -103,11 +108,21 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     private TextView TV1;
     private NavigationView navigationView;
     private String s = "";
+    SendPoints sendPoints = new SendPoints();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
+
+
+        sendPoints.connect("192.168.2.123", 65432, connected -> {
+            sendPoints.write("Hello World".getBytes());
+        });
+
+
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
@@ -323,6 +338,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
 
                 navigationView.setPosition(new Point(x, y, z), rotation[1]);
+                sendPoints.write(("c;" + String.valueOf(x) + ";" + String.valueOf(y) + ";" + String.valueOf(z) + ";" + String.valueOf(rotation[1]) + "\n").getBytes());
 
             }
 
@@ -361,16 +377,25 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             // using it.
 
             FloatBuffer fb = pointCloud.getPoints();
+            Gson gson = new Gson();
+//            List<Point> pointsToSend = new ArrayList<>();
+
             while (fb.hasRemaining()) {
                 float x = fb.get();
                 float y = fb.get();
                 float z = fb.get();
                 float confidence = fb.get();
 
-                if (confidence > 0.6)
+                if (confidence > 0.6) {
 //                    if (Math.abs(camera.getDisplayOrientedPose().ty() - y) < 1)
-                    navigationView.addPoint(new Point(x, y, z));
+                    Point p = new Point(x, y, z);
+                    navigationView.addPoint(p);
+                    sendPoints.write(("p;" + String.valueOf(x) + ";" + String.valueOf(y) + ";" + String.valueOf(z) + "\n").getBytes());
+//                    pointsToSend.add(p);
+                }
             }
+
+//            sendPoints.write(gson.toJson(pointsToSend).getBytes());
 
 
             pointCloud.release();
