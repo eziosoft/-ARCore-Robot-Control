@@ -5,7 +5,7 @@ Server myServer;
 float cx, cy, cheading;
 
 void setup() {
-  fullScreen();
+  fullScreen(P3D);
   noSmooth();
   background(0);
   //translate(140, 0);
@@ -38,8 +38,9 @@ void draw() {
             try {
               float x= width/2+(Float.parseFloat(tp[1]))*100f;
               float y= height/2+(Float.parseFloat(tp[3]))*100f;
+              float z= height/2+(Float.parseFloat(tp[2]))*100f;
               stroke(255);
-              point( x, y);
+              point( x, y, z);
             }
             catch(Exception e) {
             }

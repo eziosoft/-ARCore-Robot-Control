@@ -31,11 +31,14 @@ class SendPoints() {
         this.port = port
         this.IP = IP
         GlobalScope.launch {
-            socket = Socket(InetAddress.getByName(IP), port)
+            try {
+                socket = Socket(InetAddress.getByName(IP), port)
 
-            if (socket != null) {
-                dout = DataOutputStream(socket?.getOutputStream())
-                connectionStatus.OnConnectionStatusChanged(socket?.isConnected)
+                if (socket != null) {
+                    dout = DataOutputStream(socket?.getOutputStream())
+                    connectionStatus.OnConnectionStatusChanged(socket?.isConnected)
+                }
+            } catch (e: Exception) {
             }
         }
     }

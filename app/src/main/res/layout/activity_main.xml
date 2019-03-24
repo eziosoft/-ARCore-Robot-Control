@@ -13,6 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
+
+<androidx.drawerlayout.widget.DrawerLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".HelloArActivity"
+    android:id="@+id/drawer_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,14 +29,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
-    tools:context="com.google.ar.core.examples.java.helloar.HelloArActivity">
+    >
 
     <TextView
         android:id="@+id/TV1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="dadsad\nasaddadsad\nasad"
+        android:text="-\n-\n-"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,3 +84,18 @@
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_view"
+        android:layout_gravity="bottom|start"
+        android:id="@+id/nav_view"
+        android:foregroundGravity="bottom"
+
+        />
+
+
+</androidx.drawerlayout.widget.DrawerLayout>

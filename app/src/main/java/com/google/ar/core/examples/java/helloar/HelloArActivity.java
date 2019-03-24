@@ -16,15 +16,23 @@
 
 package com.google.ar.core.examples.java.helloar;
 
+import android.content.DialogInterface;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.os.Environment;
+import android.text.InputType;
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,6 +99,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
     private BottomNavigationView bottomNavigationView;
 
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -109,19 +118,12 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     private NavigationView navigationView;
     private String s = "";
     SendPoints sendPoints = new SendPoints();
+    FileSave fileSave = new FileSave();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
-
-
-        sendPoints.connect("192.168.2.123", 65432, connected -> {
-            sendPoints.write("Hello World".getBytes());
-        });
-
 
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
@@ -162,6 +164,61 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             }
             return false;
         });
+
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+
+
+        com.google.android.material.navigation.NavigationView drawerNavigation = findViewById(R.id.nav_view);
+        drawerNavigation.setNavigationItemSelectedListener(new com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_connect_server:
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(HelloArActivity.this);
+                        builder.setTitle("IP");
+
+                        final EditText input = new EditText(HelloArActivity.this);
+                        input.setInputType(InputType.TYPE_CLASS_TEXT);
+                        builder.setView(input);
+
+                        builder.setPositiveButton("OK", (dialog, which) -> {
+                            String m_Text = input.getText().toString();
+                            if (!m_Text.isEmpty()) {
+                                sendPoints.connect(m_Text, 65432, connected -> {
+                                });
+                            } else {
+                                sendPoints.connect("192.168.1.147", 65432, connected -> {
+                                });
+                            }
+                            drawerLayout.closeDrawers();
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                drawerLayout.closeDrawers();
+                            }
+                        });
+
+                        builder.show();
+                        break;
+
+                    case R.id.menu_start_scan:
+                        fileSave.openFile(Environment.getExternalStorageDirectory() + "/scan" + String.valueOf(System.currentTimeMillis()) + ".xyz");
+                        break;
+
+                    case R.id.menu_end_scan:
+                        fileSave.close();
+                        break;
+
+                }
+                return false;
+            }
+        });
+
+
     }
 
     @Override
@@ -376,10 +433,8 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             // Application is responsible for releasing the point cloud resources after
             // using it.
 
+            //extracting the points
             FloatBuffer fb = pointCloud.getPoints();
-            Gson gson = new Gson();
-//            List<Point> pointsToSend = new ArrayList<>();
-
             while (fb.hasRemaining()) {
                 float x = fb.get();
                 float y = fb.get();
@@ -387,16 +442,12 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 float confidence = fb.get();
 
                 if (confidence > 0.6) {
-//                    if (Math.abs(camera.getDisplayOrientedPose().ty() - y) < 1)
                     Point p = new Point(x, y, z);
                     navigationView.addPoint(p);
                     sendPoints.write(("p;" + String.valueOf(x) + ";" + String.valueOf(y) + ";" + String.valueOf(z) + "\n").getBytes());
-//                    pointsToSend.add(p);
+                    fileSave.append(-x + " " + -z + " " + y + "\n");
                 }
             }
-
-//            sendPoints.write(gson.toJson(pointsToSend).getBytes());
-
 
             pointCloud.release();
 
